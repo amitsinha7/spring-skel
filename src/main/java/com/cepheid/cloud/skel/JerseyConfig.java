@@ -35,7 +35,7 @@ public class JerseyConfig extends ResourceConfig {
     register(SwaggerSerializers.class);
     BeanConfig beanConfig = new BeanConfig();
     beanConfig.setVersion("API " + "1.0");
-    beanConfig.setSchemes(new String[] { "https" });
+    beanConfig.setSchemes(new String[] { "http","https" });
     beanConfig.setHost("localhost:9443");
     beanConfig.setBasePath("/app");
     // comma separated string
