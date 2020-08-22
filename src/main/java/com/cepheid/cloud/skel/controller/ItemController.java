@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Component
 @Path("/api/1.0/items")
-@Api()
+@Api(value = "Item Controller")
 public class ItemController {
 
 	private final ItemRepository mItemRepository;
