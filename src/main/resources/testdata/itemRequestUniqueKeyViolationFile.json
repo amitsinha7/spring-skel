@@ -1,0 +1,14 @@
+{
+	"name": "My Biopic",
+	"state": "valid",
+	"descriptionRequests": [
+		{
+			"type": "Author",
+			"details": "Amit Sinha"
+		},
+		{
+			"type": "Location",
+			"details": "Stockolm"
+		}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"state": "invalid",
+	"descriptions": [
+		{
+			"type": "Author",
+			"details": "J. R. R. Tolkien",
+			"id": 4
+		},
+		{
+			"type": "Genre",
+			"details": "Fantasy",
+			"id": 7
+		}
+	],
+	"id": 4
+}

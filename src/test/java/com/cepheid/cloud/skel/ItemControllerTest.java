@@ -1,13 +1,14 @@
 package com.cepheid.cloud.skel;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.client.Entity;
@@ -33,11 +34,29 @@ public class ItemControllerTest extends TestBase {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	@Value("classpath:testdata/itemrequest.json")
+	@Value("classpath:testdata/itemRequestFile.json")
 	private Resource itemRequestFile;
-	
-	@Value("classpath:testdata/item.json")
-	private Resource itemFile;;
+
+	@Value("classpath:testdata/itemUpdateFile.json")
+	private Resource itemUpdateFile;
+
+	@Value("classpath:testdata/itemRequestUniqueKeyViolationFile.json")
+	private Resource itemRequestUniqueKeyViolationFile;
+
+	@Value("classpath:testdata/itemRequestForeignKeyViolationFile.json")
+	private Resource itemRequestForeignKeyViolationFile;
+
+	@Value("classpath:testdata/itemUniqueKeyViolationFile.json")
+	private Resource itemUniqueKeyViolationFile;
+
+	@Value("classpath:testdata/itemForeignKeyViolationFile.json")
+	private Resource itemForeignKeyViolationFile;
+
+	@Value("classpath:testdata/itemRequestBadRequestFile.json")
+	private Resource itemRequestBadRequestFile;
+
+	@Value("classpath:testdata/itemBadRequestFile.json")
+	private Resource itemBadRequestFile;
 
 	@Autowired
 	ItemRepository itemRepository;
@@ -48,8 +67,10 @@ public class ItemControllerTest extends TestBase {
 		Builder itemController = getBuilder("/app/api/1.0/items");
 		ItemResponseDTO response = itemController.get(new GenericType<ItemResponseDTO>() {
 		});
-		assertEquals("Item Size Receivied Via URL Must be equal To Item Size Present In Repository",
-				response.getItems().size(), itemRepository.findAll().size());
+		List<Item> items = itemRepository.findAll();
+		assertNotNull(response);
+		assertEquals("Size of Items from DB and Request must be same", response.getItems().size(), items.size());
+		assertEquals("Items  Must be equal from Request and DB ", items, response.getItems());
 	}
 
 	@Test
@@ -59,6 +80,7 @@ public class ItemControllerTest extends TestBase {
 		ItemResponseDTO response = itemController.get(new GenericType<ItemResponseDTO>() {
 		});
 		Optional<Item> item = itemRepository.findById((long) 1.0);
+		assertNotNull(response);
 		assertEquals("Get Item By Id Must be equal", response.getItem().getId(), item.get().getId());
 		assertEquals("Both Items Must be equal", response.getItem(), item.get());
 	}
@@ -70,36 +92,118 @@ public class ItemControllerTest extends TestBase {
 		String itemRequest = testResource(itemRequestFile);
 		Entity<String> json = Entity.json(itemRequest);
 		int sizeBeforeItemCreated = itemRepository.findAll().size();
-		itemController.post(json, new GenericType<ItemResponseDTO>() {
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
 		});
+		Optional<Item> item = itemRepository.findById(response.getItem().getId());
 		int sizeAfterItemCreated = itemRepository.findAll().size();
-		assertEquals("Item Created Evaluated after change in Item size directly from the DB",
-				sizeBeforeItemCreated + 1, sizeAfterItemCreated);
+		assertNotNull(response);
+		assertEquals("Item Size will be change after adding the a new item ", sizeBeforeItemCreated + 1,
+				sizeAfterItemCreated);
+		assertEquals("Created Item By Id Must be equal Response Item Id", response.getItem().getId(),
+				item.get().getId());
+		assertEquals("Created and Extrated Item Items Must be equal", response.getItem(), item.get());
 	}
 
 	@Test
 	public void updateItem() throws Exception {
 		LOGGER.info("updateItem()");
 		Builder itemController = getBuilder("/app/api/1.0/items/update");
-		String itemRequest = testResource(itemFile);
+		String itemRequest = testResource(itemUpdateFile);
 		Entity<String> json = Entity.json(itemRequest);
-		Optional<Item> itemBeforeUpdate = itemRepository.findById((long) 4.0);
-		itemController.post(json, new GenericType<ItemResponseDTO>() {
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
 		});
 		Optional<Item> itemAfterUpdate = itemRepository.findById((long) 4.0);
-		assertNotEquals("Updated And Added Description To Item ",itemBeforeUpdate.get().getDescriptions().size(), itemAfterUpdate.get().getDescriptions().size());
+		assertNotNull(response);
+		assertEquals("Updated and Extracted Item Items Must be equal", response.getItem(), itemAfterUpdate.get());
 	}
 
 	@Test
 	public void deleteItemById() throws Exception {
 		LOGGER.info("deleteItemById()");
 		Builder itemController = getBuilder("/app/api/1.0/items/delete/5");
-		itemController.get(new GenericType<ItemResponseDTO>() {
+		ItemResponseDTO response = itemController.get(new GenericType<ItemResponseDTO>() {
 		});
-		Optional<Item> item = itemRepository.findById((long) 5.0);
-		if(!item.isPresent()) {
-			assertTrue(true);
-		}
+		assertNotNull(response);
+		assertTrue("Item Deleted Successfully",
+				response.getErrorInfo().getErrorMessage().equals("Deleted Item Successfully .."));
+	}
+
+	@Test
+	public void createItemUniqueKeyViolation() throws Exception {
+		LOGGER.info("createItemUniqueKeyViolation()");
+		Builder itemController = getBuilder("/app/api/1.0/items/create");
+		String itemRequest = testResource(itemRequestUniqueKeyViolationFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Create Item UniqueKey Violation", response.getErrorInfo().getErrorMessage()
+				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
+	}
+
+	@Test
+	public void createItemForeignKeyViolation() throws Exception {
+		LOGGER.info("createItemForeignKeyViolation()");
+		Builder itemController = getBuilder("/app/api/1.0/items/create");
+		String itemRequest = testResource(itemRequestForeignKeyViolationFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Create Item Foreign Violation", response.getErrorInfo().getErrorMessage()
+				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
+	}
+
+	@Test
+	public void updateItemUniqueKeyViolation() throws Exception {
+		LOGGER.info("updateItemUniqueKeyViolation()");
+		Builder itemController = getBuilder("/app/api/1.0/items/update");
+		String itemRequest = testResource(itemUniqueKeyViolationFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Update Item Unique Violation", response.getErrorInfo().getErrorMessage()
+				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
+	}
+
+	@Test
+	public void updateItemForeignKeyViolation() throws Exception {
+		LOGGER.info("updateItemForeignKeyViolation()");
+		Builder itemController = getBuilder("/app/api/1.0/items/update");
+		String itemRequest = testResource(itemForeignKeyViolationFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Update Item Foreign Violation", response.getErrorInfo().getErrorMessage()
+				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
+	}
+
+	@Test
+	public void updateItemBadRequest() throws Exception {
+		LOGGER.info("updateItemBadRequest()");
+		Builder itemController = getBuilder("/app/api/1.0/items/update");
+		String itemRequest = testResource(itemBadRequestFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Bad Request For Update Existing",
+				response.getErrorInfo().getErrorMessage().equals("Bad request, please check request."));
+	}
+
+	@Test
+	public void createItemRequestBadRequest() throws Exception {
+		LOGGER.info("createItemRequestBadRequest()");
+		Builder itemController = getBuilder("/app/api/1.0/items/update");
+		String itemRequest = testResource(itemRequestBadRequestFile);
+		Entity<String> json = Entity.json(itemRequest);
+		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
+		});
+		assertNotNull(response);
+		assertTrue("Bad Request For Create Existing",
+				response.getErrorInfo().getErrorMessage().equals("Bad request, please check request."));
 	}
 
 	private String testResource(Resource resource) {
