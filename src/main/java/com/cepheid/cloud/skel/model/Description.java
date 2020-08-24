@@ -2,11 +2,15 @@ package com.cepheid.cloud.skel.model;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "type", "details", "item_id" }) })
 public class Description extends AbstractEntity {
 
 	private String type;
@@ -15,6 +19,7 @@ public class Description extends AbstractEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonBackReference
+	@JoinColumn(name = "item_id")
 	private Item item;
 
 	public Description() {

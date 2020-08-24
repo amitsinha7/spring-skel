@@ -9,6 +9,8 @@ import javax.ws.rs.core.GenericType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -18,14 +20,19 @@ import com.cepheid.cloud.skel.repository.ItemRepository;
 @RunWith(SpringRunner.class)
 public class ItemControllerTest extends TestBase {
 
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	@Autowired
 	ItemRepository itemRepository;
 
 	@Test
 	public void testGetItems() throws Exception {
+
+		LOGGER.info("testGetItems()");
 		Builder itemController = getBuilder("/app/api/1.0/items");
 		Collection<Item> items = itemController.get(new GenericType<Collection<Item>>() {
 		});
-		assertEquals("Item Size Receivied Via URL Must be equal To Item Size Present In Repository", items.size(), itemRepository.findAll().size());
+		assertEquals("Item Size Receivied Via URL Must be equal To Item Size Present In Repository", items.size(),
+				itemRepository.findAll().size());
 	}
 }

@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.cepheid.cloud.skel.controller.ItemController;
+import com.cepheid.cloud.skel.helper.Validator;
 import com.cepheid.cloud.skel.model.Description;
 import com.cepheid.cloud.skel.model.Item;
 import com.cepheid.cloud.skel.model.State;
 import com.cepheid.cloud.skel.repository.DescriptionRepository;
 import com.cepheid.cloud.skel.repository.ItemRepository;
 
-
-@SpringBootApplication(scanBasePackageClasses = { ItemController.class, SkelApplication.class })
+@SpringBootApplication(scanBasePackageClasses = { ItemController.class, SkelApplication.class, Validator.class})
 @EnableJpaRepositories(basePackageClasses = { ItemRepository.class, DescriptionRepository.class })
 public class SkelApplication {
 
@@ -33,10 +33,7 @@ public class SkelApplication {
 						repository.save(item);
 						descriptionRepository.save(new Description("Author", "J. R. R. Tolkien", item));
 					});
-			for (Item c : repository.findAll()) {
-				System.out.println(c.toString());
-			}
+			repository.findAll().forEach(System.out::println);
 		};
 	}
-
 }

@@ -1,6 +1,6 @@
 package com.cepheid.cloud.skel.response;
 
-public class ErrorInfoDTO {
+public class ErrorInfo {
 	
 	private String errorCode;
 	private String errorMessage;

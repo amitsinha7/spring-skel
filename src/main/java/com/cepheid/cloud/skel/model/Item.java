@@ -1,12 +1,14 @@
 package com.cepheid.cloud.skel.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -14,17 +16,18 @@ import org.hibernate.annotations.LazyCollectionOption;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "state" }) })
 public class Item extends AbstractEntity {
 
 	private String name;
 
+	@Enumerated(EnumType.STRING)
+	private State state;
+
 	@OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JsonManagedReference
-	private Set<Description> descriptions;
-
-	@Enumerated(EnumType.STRING)
-	private State state;
+	private List<Description> descriptions;
 
 	public Item() {
 
@@ -43,11 +46,11 @@ public class Item extends AbstractEntity {
 		this.name = name;
 	}
 
-	public Set<Description> getDescriptions() {
+	public List<Description> getDescriptions() {
 		return descriptions;
 	}
 
-	public void setDescriptions(Set<Description> descriptions) {
+	public void setDescriptions(List<Description> descriptions) {
 		this.descriptions = descriptions;
 	}
 
@@ -63,5 +66,5 @@ public class Item extends AbstractEntity {
 	public String toString() {
 		return "Item [name=" + name + ", descriptions=" + descriptions + ", state=" + state + "]";
 	}
-	
+
 }
