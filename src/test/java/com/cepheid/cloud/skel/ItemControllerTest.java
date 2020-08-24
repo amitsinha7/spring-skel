@@ -43,9 +43,6 @@ public class ItemControllerTest extends TestBase {
 	@Value("classpath:testdata/itemRequestUniqueKeyViolationFile.json")
 	private Resource itemRequestUniqueKeyViolationFile;
 
-	@Value("classpath:testdata/itemRequestForeignKeyViolationFile.json")
-	private Resource itemRequestForeignKeyViolationFile;
-
 	@Value("classpath:testdata/itemUniqueKeyViolationFile.json")
 	private Resource itemUniqueKeyViolationFile;
 
@@ -79,7 +76,7 @@ public class ItemControllerTest extends TestBase {
 		Builder itemController = getBuilder("/app/api/1.0/items/1");
 		ItemResponseDTO response = itemController.get(new GenericType<ItemResponseDTO>() {
 		});
-		Optional<Item> item = itemRepository.findById((long) 1.0);
+		Optional<Item> item = itemRepository.findById((long) 1);
 		assertNotNull(response);
 		assertEquals("Get Item By Id Must be equal", response.getItem().getId(), item.get().getId());
 		assertEquals("Both Items Must be equal", response.getItem(), item.get());
@@ -112,7 +109,7 @@ public class ItemControllerTest extends TestBase {
 		Entity<String> json = Entity.json(itemRequest);
 		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
 		});
-		Optional<Item> itemAfterUpdate = itemRepository.findById((long) 4.0);
+		Optional<Item> itemAfterUpdate = itemRepository.findById((long) 1);
 		assertNotNull(response);
 		assertEquals("Updated and Extracted Item Items Must be equal", response.getItem(), itemAfterUpdate.get());
 	}
@@ -120,7 +117,7 @@ public class ItemControllerTest extends TestBase {
 	@Test
 	public void deleteItemById() throws Exception {
 		LOGGER.info("deleteItemById()");
-		Builder itemController = getBuilder("/app/api/1.0/items/delete/5");
+		Builder itemController = getBuilder("/app/api/1.0/items/delete/3");
 		ItemResponseDTO response = itemController.get(new GenericType<ItemResponseDTO>() {
 		});
 		assertNotNull(response);
@@ -138,19 +135,6 @@ public class ItemControllerTest extends TestBase {
 		});
 		assertNotNull(response);
 		assertTrue("Create Item UniqueKey Violation", response.getErrorInfo().getErrorMessage()
-				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
-	}
-
-	@Test
-	public void createItemForeignKeyViolation() throws Exception {
-		LOGGER.info("createItemForeignKeyViolation()");
-		Builder itemController = getBuilder("/app/api/1.0/items/create");
-		String itemRequest = testResource(itemRequestForeignKeyViolationFile);
-		Entity<String> json = Entity.json(itemRequest);
-		ItemResponseDTO response = itemController.post(json, new GenericType<ItemResponseDTO>() {
-		});
-		assertNotNull(response);
-		assertTrue("Create Item Foreign Violation", response.getErrorInfo().getErrorMessage()
 				.equals("Error - Unique Key Violation!! -  Foreign Key Violation"));
 	}
 

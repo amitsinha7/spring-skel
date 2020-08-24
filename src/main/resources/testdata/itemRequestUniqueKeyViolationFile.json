@@ -1,14 +1,10 @@
 {
-	"name": "My Biopic",
+	"name": "Unfinished Tales and The History of Middle-earth",
 	"state": "valid",
 	"descriptionRequests": [
 		{
 			"type": "Author",
-			"details": "Amit Sinha"
-		},
-		{
-			"type": "Location",
-			"details": "Stockolm"
+			"details": "J. R. R. Tolkien"
 		}
 	]
 }

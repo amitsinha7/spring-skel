@@ -1,17 +1,12 @@
 {
 	"name": "Unfinished Tales and The History of Middle-earth",
-	"state": "invalid",
+	"state": "valid",
 	"descriptions": [
 		{
 			"type": "Author",
 			"details": "J. R. R. Tolkien",
-			"id": 4
-		},
-		{
-			"type": "Genre",
-			"details": "Fantasy",
-			"id": 3
+			"id": 2
 		}
 	],
-	"id": 4
+	"id": 2
 }
